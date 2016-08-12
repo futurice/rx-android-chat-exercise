@@ -9,9 +9,11 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import rx.Observable;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.subscriptions.BooleanSubscription;
 import rx.subscriptions.CompositeSubscription;
@@ -37,10 +39,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (socket != null) {
             Observable<String> messages = createMessageListener(socket);
-            subscription.add(messages.subscribe(
-                    msg -> Log.d(TAG, "chat message: " + msg)
-            ));
-            socket.on("chat message", onNewMessage);
+            subscription.add(
+                    messages
+                            .scan(new ArrayList<>(),
+                                    (list, value) -> {
+                                        list.add(value);
+                                        return list;
+                                    })
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    msg -> {
+                                        Log.d(TAG, "chat message: " + msg);
+                                    }));
             socket.connect();
         }
     }
@@ -63,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (socket != null) {
             socket.disconnect();
-            socket.off("chat message", onNewMessage);
             socket = null;
         }
         if (subscription != null) {
@@ -71,6 +80,4 @@ public class MainActivity extends AppCompatActivity {
             subscription = null;
         }
     }
-
-    private Emitter.Listener onNewMessage = args -> Log.d(TAG, "chat message: " + args[0]);
 }
