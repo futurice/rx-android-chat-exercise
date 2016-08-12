@@ -7,6 +7,7 @@ import android.util.Log;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.jakewharton.rxbinding.view.RxView;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -51,8 +52,17 @@ public class MainActivity extends AppCompatActivity {
                                     msg -> {
                                         Log.d(TAG, "chat message: " + msg);
                                     }));
+            socket.on(Socket.EVENT_CONNECT, args -> {
+                Log.d(TAG, "connection1");
+            });
             socket.connect();
         }
+
+        RxView.clicks(findViewById(R.id.send_button))
+                .subscribe(ev -> {
+                    socket.emit("chat message", "hello world");
+                });
+
     }
 
     private static Observable<String> createMessageListener(final Socket socket) {
