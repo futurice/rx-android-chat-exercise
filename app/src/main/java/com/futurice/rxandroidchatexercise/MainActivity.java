@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         subscription = new CompositeSubscription();
 
         try {
-            socket = IO.socket("http://10.0.2.2:3000");
+            socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
         } catch (URISyntaxException e) {
             Log.e(TAG, "Error creating socket", e);
         }
