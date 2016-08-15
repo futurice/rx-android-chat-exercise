@@ -3,6 +3,8 @@ package com.futurice.rxandroidchatexercise;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -30,6 +32,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final ArrayAdapter<String> arrayAdapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        final ListView listView = (ListView) findViewById(R.id.list_view);
+        listView.setAdapter(arrayAdapter);
+
         subscription = new CompositeSubscription();
 
         try {
@@ -42,15 +49,16 @@ public class MainActivity extends AppCompatActivity {
             Observable<String> messages = createMessageListener(socket);
             subscription.add(
                     messages
-                            .scan(new ArrayList<>(),
+                            .scan(new ArrayList<String>(),
                                     (list, value) -> {
                                         list.add(value);
                                         return list;
                                     })
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
-                                    msg -> {
-                                        Log.d(TAG, "chat message: " + msg);
+                                    messageList -> {
+                                        arrayAdapter.clear();
+                                        arrayAdapter.addAll(messageList);
                                     }));
             socket.on(Socket.EVENT_CONNECT, args -> {
                 Log.d(TAG, "connection1");
