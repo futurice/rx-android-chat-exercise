@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.jakewharton.rxbinding.view.RxView;
@@ -17,10 +16,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.subscriptions.BooleanSubscription;
 import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity extends AppCompatActivity {
@@ -51,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (socket != null) {
-            Observable<String> messages = createMessageListener(socket);
+            Observable<String> messages = SocketUtil.createMessageListener(socket);
             subscription.add(
                     messages
                             .scan(new ArrayList<String>(),
@@ -81,19 +77,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-    }
-
-    private static Observable<String> createMessageListener(final Socket socket) {
-        return Observable.create(subscriber -> {
-            final Emitter.Listener listener =
-                    args -> subscriber.onNext(args[0].toString());
-            socket.on("chat message", listener);
-            subscriber.add(BooleanSubscription.create(
-                    () -> {
-                        Log.d(TAG, "unsubscribe");
-                        socket.off("chat message", listener);
-                    }));
-        });
     }
 
     @Override
