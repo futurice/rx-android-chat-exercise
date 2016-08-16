@@ -13,7 +13,7 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.jakewharton.rxbinding.view.RxView;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.List;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -47,23 +47,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (socket != null) {
-            Observable<String> messages = SocketUtil.createMessageListener(socket);
+            Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
+            Observable<List<String>> messageListObservable =  MessageUtil.accumulateMessages(messagesObservable);
+
             subscription.add(
-                    messages
-                            .scan(new ArrayList<String>(),
-                                    (list, value) -> {
-                                        list.add(value);
-                                        return list;
-                                    })
+                    messageListObservable
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
                                     messageList -> {
                                         arrayAdapter.clear();
                                         arrayAdapter.addAll(messageList);
                                     }));
-            socket.on(Socket.EVENT_CONNECT, args -> {
-                Log.d(TAG, "connection1");
-            });
+
             socket.connect();
         }
 
