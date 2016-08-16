@@ -11,9 +11,6 @@ import java.net.URISyntaxException;
 
 import rx.Observable;
 
-/**
- * Created by ttuo on 16/08/16.
- */
 public class MainActivityLoader extends android.support.v4.content.Loader<MessagesViewModel> {
     private static final String TAG = MainActivityLoader.class.getSimpleName();
 

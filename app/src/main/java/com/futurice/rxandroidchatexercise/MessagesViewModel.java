@@ -12,9 +12,6 @@ import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
 import rx.subscriptions.CompositeSubscription;
 
-/**
- * Created by ttuo on 16/08/16.
- */
 public class MessagesViewModel {
 
     private CompositeSubscription subscriptions;
