@@ -8,10 +8,17 @@ import java.util.Map;
 import rx.Observable;
 import rx.subjects.BehaviorSubject;
 
+/**
+ * Do not do this at home! This class is a trivial implementation of a repository and not optimized
+ * for heavy usage or even thread safe. See for instance reark.io for more proper versions.
+ *
+ */
 public class ChatMessageRepository {
     private final Map<String, ChatMessage> messageMap = new HashMap<>();
     private final BehaviorSubject<List<ChatMessage>> chatMessageListSubject = BehaviorSubject.create();
 
+    // Internal function to calculate any changes in the hash and to publish it in the stream.
+    // It's not pretty but for this purpose it is good enough.
     private void updateList() {
         ArrayList<ChatMessage> messageList = new ArrayList<>();
         messageList.addAll(messageMap.values());
