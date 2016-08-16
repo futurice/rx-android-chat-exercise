@@ -13,7 +13,6 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.jakewharton.rxbinding.view.RxView;
 
 import java.net.URISyntaxException;
-import java.util.List;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -22,8 +21,11 @@ import rx.subscriptions.CompositeSubscription;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private CompositeSubscription subscription;
+    private CompositeSubscription bindingSubscriptions;
+    private MessagesViewModel messagesViewModel;
     private Socket socket;
+
+    private ArrayAdapter<String> arrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +36,8 @@ public class MainActivity extends AppCompatActivity {
         final EditText editText = (EditText) findViewById(R.id.edit_text);
         final ListView listView = (ListView) findViewById(R.id.list_view);
 
-        final ArrayAdapter<String> arrayAdapter =
-                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listView.setAdapter(arrayAdapter);
-
-        subscription = new CompositeSubscription();
 
         try {
             socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
@@ -46,20 +45,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Error creating socket", e);
             finish();
         }
-
-        Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
-        Observable<List<String>> messageListObservable =  MessageUtil.accumulateMessages(messagesObservable);
-
-        subscription.add(
-                messageListObservable
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                messageList -> {
-                                    arrayAdapter.clear();
-                                    arrayAdapter.addAll(messageList);
-                                }));
-
-        socket.connect();
 
         RxView.clicks(sendButton)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -71,6 +56,33 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
+        messagesViewModel = new MessagesViewModel(messagesObservable);
+        messagesViewModel.subscribe();
+        socket.connect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bindingSubscriptions = new CompositeSubscription();
+        bindingSubscriptions.add(
+                messagesViewModel
+                        .getMessageList()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                messageList -> {
+                                    arrayAdapter.clear();
+                                    arrayAdapter.addAll(messageList);
+                                })
+        );
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        bindingSubscriptions.unsubscribe();
+        bindingSubscriptions = null;
     }
 
     @Override
@@ -80,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
             socket.disconnect();
             socket = null;
         }
-        if (subscription != null) {
-            subscription.clear();
-            subscription = null;
+        if (messagesViewModel != null) {
+            messagesViewModel.unsubscribe();
+            messagesViewModel = null;
         }
     }
 }
