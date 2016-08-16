@@ -1,6 +1,8 @@
 package com.futurice.rxandroidchatexercise;
 
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -8,62 +10,42 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 import com.jakewharton.rxbinding.view.RxView;
 
-import java.net.URISyntaxException;
-
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<MessagesViewModel> {
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int LOADER_ID = 101;
 
     private CompositeSubscription bindingSubscriptions;
     private MessagesViewModel messagesViewModel;
-    private Socket socket;
 
     private ArrayAdapter<String> arrayAdapter;
+    private View sendButton;
+    private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final View sendButton = findViewById(R.id.send_button);
-        final EditText editText = (EditText) findViewById(R.id.edit_text);
-        final ListView listView = (ListView) findViewById(R.id.list_view);
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
+        sendButton = findViewById(R.id.send_button);
+        editText = (EditText) findViewById(R.id.edit_text);
+
+        final ListView listView = (ListView) findViewById(R.id.list_view);
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         listView.setAdapter(arrayAdapter);
-
-        try {
-            socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
-        } catch (URISyntaxException e) {
-            Log.e(TAG, "Error creating socket", e);
-            finish();
-        }
-
-        RxView.clicks(sendButton)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(ev -> {
-                    final String text = editText.getText().toString();
-                    if (text.length() > 0) {
-                        socket.emit("chat message", text);
-                        editText.setText("");
-                    }
-                });
-
-        Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
-        messagesViewModel = new MessagesViewModel(messagesObservable);
-        messagesViewModel.subscribe();
-        socket.connect();
     }
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
         bindingSubscriptions = new CompositeSubscription();
         bindingSubscriptions.add(
@@ -76,10 +58,22 @@ public class MainActivity extends AppCompatActivity {
                                     arrayAdapter.addAll(messageList);
                                 })
         );
+        bindingSubscriptions.add(
+            RxView.clicks(sendButton)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(ev -> {
+                        final String text = editText.getText().toString();
+                        if (text.length() > 0) {
+                            messagesViewModel.sendMessage(text);
+                            editText.setText("");
+                        }
+                    })
+        );
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "onPause");
         super.onPause();
         bindingSubscriptions.unsubscribe();
         bindingSubscriptions = null;
@@ -87,14 +81,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onDestroy");
         super.onDestroy();
-        if (socket != null) {
-            socket.disconnect();
-            socket = null;
-        }
-        if (messagesViewModel != null) {
-            messagesViewModel.unsubscribe();
-            messagesViewModel = null;
-        }
+    }
+
+    @Override
+    public Loader<MessagesViewModel> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG, "onCreateLoader(" + id + ")");
+        return new MainActivityLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, MessagesViewModel data) {
+        Log.d(TAG, "onLoadFinished");
+        this.messagesViewModel = data;
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+        Log.d(TAG, "onLoaderReset");
+        this.messagesViewModel = null;
     }
 }

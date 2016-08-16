@@ -1,9 +1,14 @@
 package com.futurice.rxandroidchatexercise;
 
+import android.content.Context;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
+import rx.functions.Action;
+import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
 import rx.subscriptions.CompositeSubscription;
 
@@ -14,11 +19,14 @@ public class MessagesViewModel {
 
     private CompositeSubscription subscriptions;
     private final Observable<String> messagesObservable;
+    private final Action1<String> sendMessageAction;
     private final BehaviorSubject<List<String>> messageList =
             BehaviorSubject.create(new ArrayList<>());
 
-    public MessagesViewModel(Observable<String> messagesObservable) {
+    public MessagesViewModel(Observable<String> messagesObservable,
+                             Action1<String> sendMessageAction) {
         this.messagesObservable = messagesObservable;
+        this.sendMessageAction = sendMessageAction;
     }
 
     public void subscribe() {
@@ -38,5 +46,9 @@ public class MessagesViewModel {
 
     public Observable<List<String>> getMessageList() {
         return messageList.asObservable();
+    }
+
+    public void sendMessage(String message) {
+        this.sendMessageAction.call(message);
     }
 }
