@@ -11,9 +11,6 @@ import java.net.URISyntaxException;
 import rx.Observable;
 import rx.subscriptions.BooleanSubscription;
 
-/**
- * Created by ttuo on 16/08/16.
- */
 public class SocketUtil {
     private static final String TAG = SocketUtil.class.getSimpleName();
 
@@ -33,7 +30,7 @@ public class SocketUtil {
     public static Socket createSocket() {
         Socket socket = null;
         try {
-            socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
+            socket = IO.socket("https://blooming-brook-85633.herokuapp.com/");
         } catch (URISyntaxException e) {
             Log.e(TAG, "Error creating socket", e);
         }
