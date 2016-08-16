@@ -3,7 +3,10 @@ package com.futurice.rxandroidchatexercise;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+
+import java.net.URISyntaxException;
 
 import rx.Observable;
 import rx.subscriptions.BooleanSubscription;
@@ -25,5 +28,15 @@ public class SocketUtil {
                         socket.off("chat message", listener);
                     }));
         });
+    }
+
+    public static Socket createSocket() {
+        Socket socket = null;
+        try {
+            socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "Error creating socket", e);
+        }
+        return socket;
     }
 }

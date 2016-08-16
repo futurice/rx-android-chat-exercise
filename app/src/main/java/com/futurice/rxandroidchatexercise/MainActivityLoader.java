@@ -41,12 +41,7 @@ public class MainActivityLoader extends android.support.v4.content.Loader<Messag
     protected void onForceLoad() {
         Log.d(TAG, "onForceLoad");
 
-        try {
-            socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
-        } catch (URISyntaxException e) {
-            Log.e(TAG, "Error creating socket", e);
-        }
-
+        socket = SocketUtil.createSocket();
         socket.connect();
         Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
         messagesViewModel = new MessagesViewModel(
