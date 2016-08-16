@@ -38,4 +38,7 @@ dependencies {
 
     // RxBinding wrappers
     compile 'com.jakewharton.rxbinding:rxbinding:0.3.0'
+
+    // Gson serializer
+    compile 'com.google.code.gson:gson:2.4'
 }

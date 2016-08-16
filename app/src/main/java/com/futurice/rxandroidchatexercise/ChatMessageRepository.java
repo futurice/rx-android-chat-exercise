@@ -1,0 +1,37 @@
+package com.futurice.rxandroidchatexercise;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import rx.Observable;
+import rx.subjects.BehaviorSubject;
+
+public class ChatMessageRepository {
+    private final Map<String, ChatMessage> messageMap = new HashMap<>();
+    private final BehaviorSubject<List<ChatMessage>> chatMessageListSubject = BehaviorSubject.create();
+
+    private void updateList() {
+        ArrayList<ChatMessage> messageList = new ArrayList<>();
+        messageList.addAll(messageMap.values());
+        messageList.sort((a, b) -> {
+            if (a.getTimestamp() > b.getTimestamp()) {
+                return 1;
+            } else if (a.getTimestamp() < b.getTimestamp()) {
+                return -1;
+            }
+            return 0;
+        });
+        chatMessageListSubject.onNext(messageList);
+    }
+
+    public void put(ChatMessage chatMessage) {
+        messageMap.put(chatMessage.getId(), chatMessage);
+        updateList();
+    }
+
+    public Observable<List<ChatMessage>> getMessageListStream() {
+        return chatMessageListSubject.asObservable();
+    }
+}

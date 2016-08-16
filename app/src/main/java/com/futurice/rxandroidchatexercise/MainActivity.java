@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements
     private CompositeSubscription bindingSubscriptions;
     private MessagesViewModel messagesViewModel;
 
-    private ArrayAdapter<String> arrayAdapter;
+    private ArrayAdapter<ChatMessage> arrayAdapter;
     private View sendButton;
     private EditText editText;
 

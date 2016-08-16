@@ -15,22 +15,20 @@ import rx.subscriptions.CompositeSubscription;
 public class MessagesViewModel {
 
     private CompositeSubscription subscriptions;
-    private final Observable<String> messagesObservable;
+    private final Observable<List<ChatMessage>> messageListObservable;
     private final Action1<String> sendMessageAction;
-    private final BehaviorSubject<List<String>> messageList =
+    private final BehaviorSubject<List<ChatMessage>> messageList =
             BehaviorSubject.create(new ArrayList<>());
 
-    public MessagesViewModel(Observable<String> messagesObservable,
+    public MessagesViewModel(Observable<List<ChatMessage>> messageListObservable,
                              Action1<String> sendMessageAction) {
-        this.messagesObservable = messagesObservable;
+        this.messageListObservable = messageListObservable;
         this.sendMessageAction = sendMessageAction;
     }
 
     public void subscribe() {
         unsubscribe();
         subscriptions = new CompositeSubscription();
-        Observable<List<String>> messageListObservable =
-                MessageUtil.accumulateMessages(messagesObservable);
         subscriptions.add(messageListObservable.subscribe(messageList));
     }
 
@@ -41,7 +39,7 @@ public class MessagesViewModel {
         }
     }
 
-    public Observable<List<String>> getMessageList() {
+    public Observable<List<ChatMessage>> getMessageList() {
         return messageList.asObservable();
     }
 
