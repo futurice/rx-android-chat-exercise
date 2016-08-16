@@ -44,23 +44,22 @@ public class MainActivity extends AppCompatActivity {
             socket = IO.socket("https://lit-everglades-74863.herokuapp.com");
         } catch (URISyntaxException e) {
             Log.e(TAG, "Error creating socket", e);
+            finish();
         }
 
-        if (socket != null) {
-            Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
-            Observable<List<String>> messageListObservable =  MessageUtil.accumulateMessages(messagesObservable);
+        Observable<String> messagesObservable = SocketUtil.createMessageListener(socket);
+        Observable<List<String>> messageListObservable =  MessageUtil.accumulateMessages(messagesObservable);
 
-            subscription.add(
-                    messageListObservable
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(
-                                    messageList -> {
-                                        arrayAdapter.clear();
-                                        arrayAdapter.addAll(messageList);
-                                    }));
+        subscription.add(
+                messageListObservable
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                messageList -> {
+                                    arrayAdapter.clear();
+                                    arrayAdapter.addAll(messageList);
+                                }));
 
-            socket.connect();
-        }
+        socket.connect();
 
         RxView.clicks(sendButton)
                 .observeOn(AndroidSchedulers.mainThread())
