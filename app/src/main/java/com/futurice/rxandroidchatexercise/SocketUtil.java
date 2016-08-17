@@ -11,9 +11,6 @@ import java.net.URISyntaxException;
 import rx.Observable;
 import rx.subscriptions.BooleanSubscription;
 
-/**
- * Created by ttuo on 16/08/16.
- */
 public class SocketUtil {
     private static final String TAG = SocketUtil.class.getSimpleName();
 

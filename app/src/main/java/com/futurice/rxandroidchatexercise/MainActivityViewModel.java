@@ -1,20 +1,12 @@
 package com.futurice.rxandroidchatexercise;
 
-import android.content.Context;
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
-import rx.functions.Action;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
-import rx.subscriptions.CompositeSubscription;
 
-/**
- * Created by ttuo on 16/08/16.
- */
 public class MainActivityViewModel {
 
     private final BehaviorSubject<List<String>> messageList =
