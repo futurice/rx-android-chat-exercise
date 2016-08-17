@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<MessagesViewModel> {
+        LoaderManager.LoaderCallbacks<MainActivityViewModel> {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int LOADER_ID = 101;
 
@@ -50,13 +50,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public Loader<MessagesViewModel> onCreateLoader(int id, Bundle args) {
+    public Loader<MainActivityViewModel> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "onCreateLoader(" + id + ")");
         return new MainActivityLoader(this);
     }
 
     @Override
-    public void onLoadFinished(Loader loader, MessagesViewModel data) {
+    public void onLoadFinished(Loader loader, MainActivityViewModel data) {
         Log.d(TAG, "onLoadFinished");
         presenter = new MainActivityPresenter(this, data);
     }

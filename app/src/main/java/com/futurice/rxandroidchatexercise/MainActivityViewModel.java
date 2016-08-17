@@ -8,7 +8,7 @@ import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
 import rx.subscriptions.CompositeSubscription;
 
-public class MessagesViewModel {
+public class MainActivityViewModel {
 
     private CompositeSubscription subscriptions;
     private final Observable<List<ChatMessage>> messageListObservable;
@@ -16,8 +16,8 @@ public class MessagesViewModel {
     private final BehaviorSubject<List<ChatMessage>> messageList =
             BehaviorSubject.create(new ArrayList<>());
 
-    public MessagesViewModel(Observable<List<ChatMessage>> messageListObservable,
-                             Action1<String> sendMessageAction) {
+    public MainActivityViewModel(Observable<List<ChatMessage>> messageListObservable,
+                                 Action1<String> sendMessageAction) {
         this.messageListObservable = messageListObservable;
         this.sendMessageAction = sendMessageAction;
     }

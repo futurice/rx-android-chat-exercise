@@ -11,15 +11,15 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class MainActivityPresenter {
-    private final MessagesViewModel messagesViewModel;
+    private final MainActivityViewModel mainActivityViewModel;
     private final ArrayAdapter<ChatMessage> arrayAdapter;
     private final View sendButton;
     private final EditText editText;
 
     private CompositeSubscription bindingSubscriptions;
 
-    public MainActivityPresenter(MainActivity mainActivity, MessagesViewModel messagesViewModel) {
-        this.messagesViewModel = messagesViewModel;
+    public MainActivityPresenter(MainActivity mainActivity, MainActivityViewModel mainActivityViewModel) {
+        this.mainActivityViewModel = mainActivityViewModel;
 
         sendButton = mainActivity.findViewById(R.id.send_button);
         editText = (EditText) mainActivity.findViewById(R.id.edit_text);
@@ -32,7 +32,7 @@ public class MainActivityPresenter {
     public void attach() {
         bindingSubscriptions = new CompositeSubscription();
         bindingSubscriptions.add(
-                messagesViewModel
+                mainActivityViewModel
                         .getMessageList()
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
@@ -47,7 +47,7 @@ public class MainActivityPresenter {
                         .subscribe(ev -> {
                             final String text = editText.getText().toString();
                             if (text.length() > 0) {
-                                messagesViewModel.sendMessage(text);
+                                mainActivityViewModel.sendMessage(text);
                                 editText.setText("");
                             }
                         })

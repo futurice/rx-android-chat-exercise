@@ -1,21 +1,17 @@
 package com.futurice.rxandroidchatexercise;
 
 import android.content.Context;
-import android.support.v4.content.Loader;
 import android.util.Log;
 
-import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 
-import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.UUID;
 
-import rx.Observable;
 import rx.Subscription;
 
-public class MainActivityLoader extends android.support.v4.content.Loader<MessagesViewModel> {
+public class MainActivityLoader extends android.support.v4.content.Loader<MainActivityViewModel> {
     private static final String TAG = MainActivityLoader.class.getSimpleName();
 
     private Gson gson;
@@ -23,7 +19,7 @@ public class MainActivityLoader extends android.support.v4.content.Loader<Messag
 
     private Subscription messageSubscription;
     private Socket socket;
-    private MessagesViewModel messagesViewModel;
+    private MainActivityViewModel mainActivityViewModel;
 
     public MainActivityLoader(Context context) {
         super(context);
@@ -36,8 +32,8 @@ public class MainActivityLoader extends android.support.v4.content.Loader<Messag
     protected void onStartLoading() {
         Log.d(TAG, "onStartLoading");
 
-        if (messagesViewModel != null) {
-            deliverResult(messagesViewModel);
+        if (mainActivityViewModel != null) {
+            deliverResult(mainActivityViewModel);
             return;
         }
 
@@ -58,7 +54,7 @@ public class MainActivityLoader extends android.support.v4.content.Loader<Messag
                     chatMessageRepository.put(new ChatMessage(message, false));
                 });
 
-        messagesViewModel = new MessagesViewModel(
+        mainActivityViewModel = new MainActivityViewModel(
                 chatMessageRepository.getMessageListStream(),
                 message -> {
                     ChatMessage chatMessage = new ChatMessage(
@@ -73,16 +69,16 @@ public class MainActivityLoader extends android.support.v4.content.Loader<Messag
                     socket.emit("chat message", json);
                 }
         );
-        messagesViewModel.subscribe();
-        deliverResult(messagesViewModel);
+        mainActivityViewModel.subscribe();
+        deliverResult(mainActivityViewModel);
     }
 
     @Override
     protected void onReset() {
         Log.d(TAG, "onReset");
         messageSubscription.unsubscribe();
-        messagesViewModel.unsubscribe();
-        messagesViewModel = null;
+        mainActivityViewModel.unsubscribe();
+        mainActivityViewModel = null;
         socket.disconnect();
         socket = null;
     }
