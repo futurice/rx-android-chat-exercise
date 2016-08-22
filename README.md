@@ -15,4 +15,9 @@ For messages sent to and received from the server we will start to serialise the
 3. Push the message to the repository also just after *sending* it. This way we see it immediately. However, when sending set the isPending flag to true.
 4. When the message comes from the backend, set the isPending status to false before pushing it to the repository.
 
+Message history:
+5. Use the given ChatMessageApi to retrieve previous chat messages from the backend when the loader is created.
+6. The messages are in the form of String, so you will need to use Gson to parse them from the List returned.
+7. Push the messages to the ChatRepository as its initial data.
+
 Advanced: Start moving more logic from the MainActivityLoader to the MainActivityViewModel and write unit tests for relevant parts.
