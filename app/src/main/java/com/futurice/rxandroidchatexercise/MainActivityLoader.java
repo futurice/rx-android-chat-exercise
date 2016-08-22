@@ -9,13 +9,19 @@ import com.google.gson.Gson;
 import java.util.Date;
 import java.util.UUID;
 
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class MainActivityLoader extends android.support.v4.content.Loader<MainActivityViewModel> {
     private static final String TAG = MainActivityLoader.class.getSimpleName();
 
     private Gson gson;
     private final ChatMessageRepository chatMessageRepository = new ChatMessageRepository();
+    private final ChatMessageApi chatMessageApi;
 
     private Subscription messageSubscription;
     private Socket socket;
@@ -26,6 +32,22 @@ public class MainActivityLoader extends android.support.v4.content.Loader<MainAc
         Log.d(TAG, "MainActivityLoader");
 
         gson = new Gson();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl("https://blooming-brook-85633.herokuapp.com/")
+                .build();
+        chatMessageApi = retrofit.create(ChatMessageApi.class);
+        chatMessageApi.messages()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(messages -> {
+                    for (String messageJson : messages) {
+                        ChatMessage chatMessage = gson.fromJson(messageJson, ChatMessage.class);
+                        chatMessageRepository.put(new ChatMessage(chatMessage, false));
+                    }
+                });
     }
 
     @Override
